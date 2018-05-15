@@ -1,0 +1,31 @@
+#!/bin/sh
+set -e
+
+# Get the package name from the command line
+package_path=$1; shift
+package_name=$(basename "${package_path}")
+
+# Temporary directory for zip module
+temp_dir=$(mktemp -d)
+
+# Create directory to store compiled files in
+binary_dir="${temp_dir}/${package_name}"
+mkdir -p "${binary_dir}"
+
+# Compile all source files into a separate directory
+python3 -m compileall -d "${binary_dir}" "${package_path}"
+
+# Change into directory of binary files
+cd "${binary_dir}"
+
+# Binary header
+echo "#!/usr/bin/env python3"
+
+# Write zip file to stdout
+zip * > /dev/stdout
+
+# Delete the temporary directory
+rm -rf "${temp_dir}"
+
+
+

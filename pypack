@@ -1,31 +1,30 @@
 #!/bin/sh
 set -e
 
+if [ $# -ne 2 ]; then
+	echo "USAGE: $0 package_path binary_path" > /dev/stderr
+fi
+
+tmp_dir=$(mktemp -d)
+
 # Get the package name from the command line
 package_path=$1; shift
-package_name=$(basename "${package_path}")
-
-# Temporary directory for zip module
-temp_dir=$(mktemp -d)
-
-# Create directory to store compiled files in
-binary_dir="${temp_dir}/${package_name}"
-mkdir -p "${binary_dir}"
-
-# Compile all source files into a separate directory
-python3 -m compileall -d "${binary_dir}" "${package_path}"
+binary_path=$1; shift
+binary_path=$(realpath -m "${binary_path}")
+binary_name=$(basename "${binary_path}")
+binary_zip="${tmp_dir}/${binary_name}.zip"
 
 # Change into directory of binary files
-cd "${binary_dir}"
+cd "${package_path}"
 
 # Binary header
-echo "#!/usr/bin/env python3"
+echo "#!/usr/bin/env python3" > "${binary_path}"
 
 # Write zip file to stdout
-zip * > /dev/stdout
+zip -r "${binary_zip}" * -x \*.pyc -x '*__pycache__*'
+cat "${binary_zip}" >> "${binary_path}"
 
-# Delete the temporary directory
-rm -rf "${temp_dir}"
+rm -rf "${tmp_dir}"
 
-
-
+# Make module executable
+chmod +x "${binary_path}"

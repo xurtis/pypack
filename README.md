@@ -62,3 +62,20 @@ pypack example_pkg example
 
 `use_example.py` is an example demonstrating how the binary can be used
 as a module.
+
+## Known Issues
+
+When using the recommended directory structure, the module cannot be run
+direclty with the `-m` option of `python3`. That is to say, from the
+root of this repository, **all** of the following **will** work:
+
+* `python -m example_pkg`
+* `./pypack example_pkg example && ./example`
+* `./pypack example_pkg example && python2 ./example`
+* `./pypack example_pkg example && python3 ./example`
+* `./pypack example_pkg example && python2 use-example.py`
+* `./pypack example_pkg example && python3 use-example.py`
+
+However, the following will not work:
+
+* `python3 -m example_pkg`
